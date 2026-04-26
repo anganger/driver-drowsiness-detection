@@ -44,7 +44,7 @@ The system follows a three-stage validation pipeline to minimize false positives
 ├── face_landmarker.task  # MediaPipe landmark model
 ├── requirements.txt      # Project dependencies (CPU-optimized)
 └── README.md             # Project documentation
-
+```
 ## 🌟 Command to run the model
 ```text
 python inference.py `
