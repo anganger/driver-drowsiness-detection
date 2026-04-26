@@ -44,3 +44,10 @@ The system follows a three-stage validation pipeline to minimize false positives
 ├── face_landmarker.task  # MediaPipe landmark model
 ├── requirements.txt      # Project dependencies (CPU-optimized)
 └── README.md             # Project documentation
+
+## 🌟 Command to run the model
+```text
+python inference.py `
+  --eye_model "models/eye_model.pth" `
+  --yawn_model "models/yawn_model.pth" `
+  --task_model "face_landmarker.task"
