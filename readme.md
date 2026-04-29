@@ -50,9 +50,51 @@ This repository contains the full project lifecycle, from raw training scripts t
 ├── requirements.txt                             # CPU-optimized Python dependencies
 └── readme.md                                    # Project documentation
 ```
-## 🌟 Command to run the model
-```text
+## 🚀 How to Run the Model
+
+To run this project on your local machine, you need to set up a Python virtual environment and install the required dependencies. The inference script is optimized to run on standard CPUs without requiring an NVIDIA GPU.
+
+### Step 1: Clone the Repository
+Open your terminal and clone this project to your machine:
+```bash
+git clone [https://github.com/anganger/driver-drowsiness-detection.git](https://github.com/anganger/driver-drowsiness-detection.git)
+cd driver-drowsiness-detection
+```
+
+### Step 2: Create a Virtual Environment
+It is highly recommended to use Python 3.11 or 3.12 for library compatibility.
+
+**For Windows (PowerShell):**
+```powershell
+py -3.12 -m venv venv
+.\venv\Scripts\Activate.ps1
+```
+
+**For Mac/Linux:**
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+### Step 3: Install Requirements
+Once your virtual environment is active `(venv)`, install the dependencies. The `requirements.txt` is configured to download the lightweight, CPU-only versions of PyTorch to save space and memory.
+```bash
+pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+### Step 4: Run the Inference Script
+Make sure your webcam is available, then execute the main script using the pre-trained weights:
+```powershell
 python inference.py `
   --eye_model "models/eye_model.pth" `
   --yawn_model "models/yawn_model.pth" `
   --task_model "face_landmarker.task"
+```
+*(Note: If you are on Mac/Linux, replace the backticks \` with backslashes \\ to break the command across lines).*
+
+### ⌨️ In-App Controls
+* **Q**: Quit the application.
+* **P**: Pause/Resume the video feed.
+* **R**: Reset the drowsiness counter and silence active alerts.
+* **S**: Save a screenshot of the current frame.
