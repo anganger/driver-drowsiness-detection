@@ -1,0 +1,53 @@
+# ============================================================
+#  Yawn Detection Model — Config
+#  Mirrors the MRL config structure so train_eye.py works
+#  with zero changes (just point it at this config).
+# ============================================================
+
+project:
+  name: "yawn_detection"
+  seed: 42
+
+paths:
+  mrl_root:     "yawdd_processed"
+  # Update these to your new target folder
+  outputs:      "src_ydd/output_ydd/"
+  checkpoints:  "src_ydd/output_ydd/checkpoints/"
+  plots:        "src_ydd/output_ydd/plots/"
+  reports:      "src_ydd/output_ydd/reports/"
+  tensorboard:  "src_ydd/output_ydd/runs/"
+
+dataset:
+  img_size: 224
+  label_map:
+    yawn:    1      # yawn    = drowsy signal = 1
+    talking: 0      # talking = awake        = 0
+  grayscale_to_rgb: false    # YawDD crops are color BGR — NO grayscale conversion
+
+model:
+  architecture: "mobilenetv2"
+  pretrained: true
+  num_classes: 2
+  freeze_strategy: "head_only"
+  dropout: 0.4              # slightly higher dropout — yawn dataset is smaller
+
+training:
+  batch_size: 32            # smaller than MRL because dataset is smaller
+  num_workers: 4
+  epochs: 20                # fewer needed — simpler task, smaller dataset
+  warmup_epochs: 3
+  warmup_lr: 0.001
+  full_lr: 0.0001
+  weight_decay: 1.0e-4
+  scheduler:
+    mode: "min"
+    factor: 0.5
+    patience: 3
+    min_lr: 1.0e-7
+  early_stop_patience: 6
+  amp: true
+
+evaluation:
+  target_accuracy: 0.90     # ≥90% per project spec
+  metrics: ["accuracy", "precision", "recall", "f1", "auc"]
+  gradcam_samples: 16

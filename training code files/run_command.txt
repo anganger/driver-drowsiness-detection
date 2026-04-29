@@ -1,0 +1,4 @@
+python inference.py `
+  --eye_model "outputs/checkpoints/20260421_225052/best_model.pth" `
+  --yawn_model "src_ydd/output_ydd/checkpoints/20260425_042203/best_model.pth" `
+  --task_model "face_landmarker.task"

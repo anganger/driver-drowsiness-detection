@@ -1,49 +1,54 @@
-# 🚗 AI-Powered Real-Time Driver Drowsiness Detection
+# 🚗 Real-Time Driver Drowsiness Detection System
 
 [![Python 3.12](https://img.shields.io/badge/Python-3.12-blue.svg)](https://www.python.org/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.1-orange.svg)](https://pytorch.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## 🌟 Overview
-Drowsy driving is a critical safety hazard. This project implements a high-performance monitoring system that utilizes **Deep Learning** and **Computer Vision** to detect signs of driver fatigue (sustained eye closure and frequent yawning). 
+## 🌟 The Problem
+Driver fatigue is a critical global safety issue. Studies show that 20% of road accidents are caused by drowsy driving, and it is linked to over 6,000 fatal crashes per year[cite: 1]. Shockingly, 1 in 25 adult drivers report falling asleep while driving[cite: 1]. 
 
-Developed as a Final Year Project at **Forman Christian College**, this system achieves a balance between high accuracy and real-time efficiency, optimized specifically for CPU-based inference.
+Current vehicles lack intelligent systems that can detect driver fatigue in real time, and existing solutions are either too expensive, intrusive, or inaccurate[cite: 1]. 
 
----
-
-## 🚀 Key Features
-- **Hybrid Detection Logic**: Combines geometric calculations (**EAR** - Eye Aspect Ratio & **MAR** - Mouth Aspect Ratio) with **MobileNetV2** deep learning classification.
-- **Edge-Optimized**: Designed to run at ~30 FPS on consumer-grade CPUs (Intel i5-13500H).
-- **Phase-Based Training**: Implemented a "Warmup & Unfreeze" strategy to achieve **96.9% Validation Accuracy**.
-- **Audio-Visual Alerts**: Integrated persistent alarms using `pygame` to wake the driver upon detection.
+**The Goal:** To build a non-contact, affordable, and highly reliable computer vision-based detection system using only a standard webcam[cite: 1].
 
 ---
 
-## 🛠️ Skills & Technologies
-- **Deep Learning**: Transfer Learning, MobileNetV2, Thermal-aware training management.
-- **Computer Vision**: Mediapipe Face Mesh (468 landmarks), OpenCV, Grayscale Normalization.
-- **Backend**: Python, PyTorch, Virtual Environments (venv).
-- **Frontend (Planned)**: React/Next.js dashboard for driver analytics.
+## 🛠️ What I Achieved (CPU-Only Engineering)
+A major constraint and personal challenge for this project was developing and training Deep Learning models **without a dedicated NVIDIA GPU**. 
+
+I successfully processed gigabytes of data and fine-tuned a **MobileNetV2** architecture entirely on an **Intel Core i5-13500H CPU**. By utilizing strict thermal management, phase-based training (Warmup & Unfreeze), and optimized PyTorch data loaders, the model achieved **96.91% validation accuracy**. The final inference script runs flawlessly in real-time at 30+ FPS on consumer-grade hardware[cite: 1].
 
 ---
 
-## 🧠 How It Works
-The system follows a three-stage validation pipeline to minimize false positives (like blinking):
-1. **Face Mesh Tracking**: Mediapipe identifies the eye and mouth regions.
-2. **Geometric Gating**: The system calculates EAR and MAR. If thresholds are exceeded (e.g., mouth opens wide), the DL model is triggered.
-3. **Neural Validation**: The MobileNetV2 model classifies the region. If the model confirms a "Yawn" or "Closed Eye" state for more than $N$ consecutive frames, an alert sounds.
+## 🧠 How It Works (The Pipeline)
 
+The system operates via a real-time, four-step pipeline[cite: 1]:
 
+1. **Face & Landmark Extraction**: Using the MediaPipe Face Mesh, the system extracts 468 facial landmarks per frame in real time to locate the exact coordinates of the eyes and mouth[cite: 1].
+2. **Geometric Filtering**: Before running heavy neural networks, the system calculates the Eye Aspect Ratio (EAR) and Mouth Aspect Ratio (MAR) to monitor physical distances[cite: 1].
+3. **CNN Classification**: If the geometric thresholds indicate potential drowsiness (e.g., mouth open wide or eyes low), the specific eye or mouth region is cropped and passed to the fine-tuned CNN classifiers to confirm the state (Open/Closed or Talking/Yawning)[cite: 1].
+4. **Temporal Decision Logic**: The system maintains a sliding window of recent frames (e.g., 30 frames / 1 second)[cite: 1]. A persistent audio/visual alert is only triggered if the "closed" or "yawning" state is sustained over multiple frames, effectively filtering out false positives like natural blinking[cite: 1].
 
 ---
 
-## 📂 Project Structure
+## 📊 Datasets Used
+To train the models to recognize fatigue in diverse environments, two primary datasets were utilized:
+* **MRL Eye Dataset**: Used for training the eye-state classifier. It contains nearly 85,000 images of open and closed eyes across 37 different subjects under various lighting conditions[cite: 1].
+* **YawDD (Yawning Detection Dataset)**: Comprises 351 videos of diverse subjects talking, driving normally, and yawning[cite: 1]. Frames were extracted via OpenCV to train the binary mouth-state CNN[cite: 1].
+
+---
+
+## 📂 Repository Structure
+
+This repository contains the full project lifecycle, from raw training scripts to the optimized deployment app.
 ```text
-├── models/               # Trained .pth weights for Eyes and Yawns
-├── inference.py          # Main real-time execution script
-├── face_landmarker.task  # MediaPipe landmark model
-├── requirements.txt      # Project dependencies (CPU-optimized)
-└── README.md             # Project documentation
+├── models/                                      # Final trained .pth weights for real-time inference
+├── training code files/                         # Source code containing data processing and model training scripts
+├── drowsiness_detection proposal presentation/  # Original project pitch deck and slide visuals
+├── face_landmarker.task                         # MediaPipe asset for facial landmark tracking
+├── inference.py                                 # The main real-time webcam monitoring application
+├── requirements.txt                             # CPU-optimized Python dependencies
+└── readme.md                                    # Project documentation
 ```
 ## 🌟 Command to run the model
 ```text

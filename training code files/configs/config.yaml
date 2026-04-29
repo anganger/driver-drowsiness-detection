@@ -1,0 +1,100 @@
+# ============================================================
+#  Driver Drowsiness Detection — Master Configuration
+# ============================================================
+
+project:
+  name: "drowsiness_detection"
+  seed: 42
+
+# ────────────────────────────────────────────────────────────
+# PATHS
+# Your actual dataset structure:
+#
+#   mrl_dataset/
+#     train/
+#       awake/     ← label 1 (eyes open)
+#       sleepy/    ← label 0 (eyes closed)
+#     val/
+#       awake/
+#       sleepy/
+#     test/
+#       awake/
+#       sleepy/
+# ────────────────────────────────────────────────────────────
+paths:
+  mrl_root:    "mrl_dataset"       # folder containing train/ val/ test/
+
+  outputs:     "outputs/"
+  checkpoints: "outputs/checkpoints/"
+  plots:       "outputs/plots/"
+  reports:     "outputs/reports/"
+  tensorboard: "outputs/runs/"
+
+# ────────────────────────────────────────────────────────────
+# DATASET
+# ────────────────────────────────────────────────────────────
+dataset:
+  img_size: 224            # MobileNetV2 expects 224×224
+  # Label mapping from folder names
+  label_map:
+    awake:  1              # awake  = eyes open  = 1
+    sleepy: 0              # sleepy = eyes closed = 0  (the "drowsy" class)
+  grayscale_to_rgb: true   # MRL images are grayscale; replicate to 3-channel
+
+# ────────────────────────────────────────────────────────────
+# AUGMENTATION
+# ────────────────────────────────────────────────────────────
+augmentation:
+  train:
+    horizontal_flip: true
+    random_rotation: 15        # degrees
+    brightness_jitter: 0.3
+    contrast_jitter: 0.3
+    random_crop_pad: 10        # pixels of padding before crop
+  val_test:
+    resize_only: true          # deterministic — no randomness
+
+# ────────────────────────────────────────────────────────────
+# MODEL
+# ────────────────────────────────────────────────────────────
+model:
+  architecture: "mobilenetv2"   # or "efficientnet_b0"
+  pretrained: true              # ImageNet weights
+  num_classes: 2                # open / closed
+  # Fine-tuning strategy:
+  # "head_only"  → freeze all backbone, train only classifier (first few epochs)
+  # "full"       → unfreeze everything after warmup
+  freeze_strategy: "head_only"
+  dropout: 0.3
+
+# ────────────────────────────────────────────────────────────
+# TRAINING
+# ────────────────────────────────────────────────────────────
+training:
+  batch_size: 64
+  num_workers: 4
+  epochs: 30
+  # Phase 1: head-only warmup
+  warmup_epochs: 5
+  warmup_lr: 0.001
+  # Phase 2: full fine-tune (after warmup)
+  full_lr: 0.0001
+  weight_decay: 1.0e-4
+  # Scheduler: ReduceLROnPlateau
+  scheduler:
+    mode: "min"          # monitor val_loss
+    factor: 0.5
+    patience: 4
+    min_lr: 1.0e-7
+  # Early stopping
+  early_stop_patience: 8
+  # Mixed precision (set false if GPU not available / CPU training)
+  amp: false
+
+# ────────────────────────────────────────────────────────────
+# EVALUATION
+# ────────────────────────────────────────────────────────────
+evaluation:
+  target_accuracy: 0.96     # ≥96% per spec
+  metrics: ["accuracy", "precision", "recall", "f1", "auc"]
+  gradcam_samples: 16       # images to visualize with Grad-CAM
