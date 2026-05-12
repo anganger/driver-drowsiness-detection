@@ -63,7 +63,7 @@
     </main>
 
     <script>
-        (function() { emailjs.init("YOUR_PUBLIC_KEY"); })();
+        (function() { emailjs.init("np5TXfGhgYCOnqVkA"); })();
         lucide.createIcons();
         let socket, lastEmail = 0;
 
@@ -106,7 +106,7 @@
             const email = document.getElementById('c-email').value;
             const now = Date.now();
             if (email && (now - lastEmail > 180000)) { 
-                emailjs.send("YOUR_SERVICE_ID", "YOUR_TEMPLATE_ID", {
+                emailjs.send("service_xp55cgg", "template_d87rixd", {
                     emergency_email: email, name: document.getElementById('c-name').value || "Driver",
                     risk_score: risk, time: new Date().toLocaleTimeString(), message: reason
                 }).then(() => { lastEmail = now; console.log("Autonomous Email Sent"); });

@@ -1,9 +1,18 @@
+# --- PyTorch CPU-Only Index ---
 --extra-index-url https://download.pytorch.org/whl/cpu
+
+# --- Machine Learning & Vision ---
 torch
 torchvision
 opencv-python
 mediapipe
-pygame
 numpy
 scikit-learn
+pygame
+# --- Web Server & Real-Time Streaming ---
+fastapi
+uvicorn[standard]
+websockets
+
+# --- Utilities ---
 pyyaml
