@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><title>DrowsyGuard LIVE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <style>
+        body { background-color: #0f1115; font-family: 'Inter', sans-serif; color: #e2e8f0; }
+        .glass { background: #1a1d23; border: 1px solid #2d343f; border-radius: 1.25rem; }
+        .alert-pulse { animation: pulse-bg 1.5s infinite; border-color: #ef4444 !important; }
+        @keyframes pulse-bg { 0%, 100% { background: #1a1d23; } 50% { background: #450a0a; } }
+    </style>
+</head>
+<body class="p-6">
+    <header class="max-w-7xl mx-auto flex justify-between items-center mb-8">
+        <div class="flex items-center gap-3">
+            <div class="bg-emerald-500 p-2 rounded-lg text-black"><i data-lucide="eye"></i></div>
+            <h1 class="text-xl font-black">DrowsyGuard <span class="text-emerald-500">LIVE</span></h1>
+        </div>
+        <div id="status" class="px-4 py-1 rounded-full bg-slate-800 text-[10px] font-bold border border-slate-700 uppercase tracking-widest text-slate-400">CONNECTING...</div>
+    </header>
+
+    <main class="max-w-7xl mx-auto grid grid-cols-12 gap-6">
+        <div class="col-span-12 lg:col-span-7 space-y-6">
+            <div class="glass relative overflow-hidden aspect-video shadow-2xl">
+                <img id="stream" class="w-full h-full object-cover opacity-90" src="">
+                <div id="critical-overlay" class="hidden absolute inset-0 bg-red-900/40 flex flex-col items-center justify-center border-4 border-red-500 rounded-[1.25rem]">
+                    <h2 class="text-4xl font-black text-white animate-bounce">CRITICAL ALERT</h2>
+                    <p id="alert-reason" class="text-red-200 text-sm font-bold uppercase"></p>
+                </div>
+                <div class="absolute bottom-4 left-4 flex gap-4 text-[10px] font-black uppercase bg-black/40 px-3 py-2 rounded-lg backdrop-blur-md">
+                    <div id="eye-txt" class="text-emerald-400">Eye: Monitoring</div>
+                    <div id="yawn-txt" class="text-blue-400">Mouth: Monitoring</div>
+                    <div class="text-slate-400">EAR: <span id="ear-val">0.0</span> | MAR: <span id="mar-val">0.0</span></div>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="glass p-5"><p class="text-[10px] text-slate-500 font-bold uppercase mb-2">Eye Closure (7s)</p>
+                    <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden"><div id="eye-bar" class="bg-emerald-500 h-full transition-all duration-300" style="width: 0%"></div></div>
+                </div>
+                <div class="glass p-5"><p class="text-[10px] text-slate-500 font-bold uppercase mb-2">Yawns (2m Window)</p>
+                    <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden"><div id="yawn-bar" class="bg-blue-500 h-full transition-all duration-300" style="width: 0%"></div></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-span-12 lg:col-span-5 space-y-6">
+            <div id="status-card" class="glass p-6 border-l-4 border-emerald-500">
+                <h3 class="text-xs font-bold text-slate-500 uppercase">Driver State</h3>
+                <p id="status-main" class="text-2xl font-black text-emerald-500 italic uppercase">Secure</p>
+            </div>
+            <div class="glass p-6">
+                <h3 class="text-xs font-bold text-slate-400 uppercase mb-4">Emergency Contact</h3>
+                <input id="c-name" type="text" placeholder="Driver Name" class="w-full bg-slate-900 border border-slate-700 p-2 rounded-lg text-sm mb-3 focus:outline-none focus:border-emerald-500">
+                <input id="c-email" type="email" placeholder="emergency@example.com" class="w-full bg-slate-900 border border-slate-700 p-2 rounded-lg text-sm focus:outline-none focus:border-emerald-500">
+            </div>
+            <div class="glass p-6">
+                <div class="flex justify-between items-center mb-4"><h3 class="text-xs font-bold text-slate-500 uppercase">Risk Level</h3><span id="risk-txt" class="text-2xl font-black text-emerald-500">0%</span></div>
+                <div class="w-full bg-slate-800 h-3 rounded-full overflow-hidden"><div id="risk-bar" class="bg-emerald-500 h-full transition-all duration-500" style="width: 0%"></div></div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        (function() { emailjs.init("YOUR_PUBLIC_KEY"); })();
+        lucide.createIcons();
+        let socket, lastEmail = 0;
+
+        function connect() {
+            socket = new WebSocket("ws://127.0.0.1:8000/ws");
+            socket.onopen = () => { 
+                document.getElementById('status').innerText = "LIVE"; 
+                document.getElementById('status').className = "px-4 py-1 rounded-full bg-emerald-500/10 text-emerald-500 text-[10px] font-bold border border-emerald-500/50 uppercase tracking-widest"; 
+            };
+            socket.onmessage = (e) => {
+                const d = JSON.parse(e.data);
+                document.getElementById('stream').src = d.image;
+                document.getElementById('eye-txt').innerText = "Eye: " + d.eye_label;
+                document.getElementById('yawn-txt').innerText = "Mouth: " + d.yawn_label;
+                document.getElementById('ear-val').innerText = d.ear.toFixed(2);
+                document.getElementById('mar-val').innerText = d.mar.toFixed(2);
+                document.getElementById('eye-bar').style.width = (d.eye_time / 7 * 100) + "%";
+                document.getElementById('yawn-bar').style.width = (d.yawn_count / 2 * 100) + "%";
+                document.getElementById('risk-txt').innerText = d.risk + "%";
+                document.getElementById('risk-bar').style.width = d.risk + "%";
+
+                if (d.critical) {
+                    document.getElementById('status-card').classList.add('alert-pulse');
+                    document.getElementById('status-main').innerText = "CRITICAL";
+                    document.getElementById('status-main').className = "text-2xl font-black text-red-500 italic uppercase";
+                    document.getElementById('critical-overlay').classList.remove('hidden');
+                    document.getElementById('alert-reason').innerText = d.reason;
+                    triggerEmail(d.risk, d.reason);
+                } else {
+                    document.getElementById('status-card').classList.remove('alert-pulse');
+                    document.getElementById('status-main').innerText = d.risk > 40 ? "Warning" : "Secure";
+                    document.getElementById('status-main').className = d.risk > 40 ? "text-2xl font-black text-amber-500 italic uppercase" : "text-2xl font-black text-emerald-500 italic uppercase";
+                    document.getElementById('critical-overlay').classList.add('hidden');
+                }
+            };
+            socket.onclose = () => { setTimeout(connect, 2000); };
+        }
+
+        function triggerEmail(risk, reason) {
+            const email = document.getElementById('c-email').value;
+            const now = Date.now();
+            if (email && (now - lastEmail > 180000)) { 
+                emailjs.send("YOUR_SERVICE_ID", "YOUR_TEMPLATE_ID", {
+                    emergency_email: email, name: document.getElementById('c-name').value || "Driver",
+                    risk_score: risk, time: new Date().toLocaleTimeString(), message: reason
+                }).then(() => { lastEmail = now; console.log("Autonomous Email Sent"); });
+            }
+        }
+        connect();
+    </script>
+</body>
+</html>
