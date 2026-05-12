@@ -5,36 +5,36 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## 🌟 The Problem
-Driver fatigue is a critical global safety issue. Studies show that 20% of road accidents are caused by drowsy driving, and it is linked to over 6,000 fatal crashes per year[cite: 1]. Shockingly, 1 in 25 adult drivers report falling asleep while driving[cite: 1]. 
+Driver fatigue is a critical global safety issue. Studies show that 20% of road accidents are caused by drowsy driving, and it is linked to over 6,000 fatal crashes per year. Shockingly, 1 in 25 adult drivers report falling asleep while driving. 
 
-Current vehicles lack intelligent systems that can detect driver fatigue in real time, and existing solutions are either too expensive, intrusive, or inaccurate[cite: 1]. 
+Current vehicles lack intelligent systems that can detect driver fatigue in real time, and existing solutions are either too expensive, intrusive, or inaccurate. 
 
-**The Goal:** To build a non-contact, affordable, and highly reliable computer vision-based detection system using only a standard webcam[cite: 1].
+**The Goal:** To build a non-contact, affordable, and highly reliable computer vision-based detection system using only a standard webcam.
 
 ---
 
 ## 🛠️ What I Achieved (CPU-Only Engineering)
 A major constraint and personal challenge for this project was developing and training Deep Learning models **without a dedicated NVIDIA GPU**. 
 
-I successfully processed gigabytes of data and fine-tuned a **MobileNetV2** architecture entirely on an **Intel Core i5-13500H CPU**. By utilizing strict thermal management, phase-based training (Warmup & Unfreeze), and optimized PyTorch data loaders, the model achieved **96.91% validation accuracy**. The final inference script runs flawlessly in real-time at 30+ FPS on consumer-grade hardware[cite: 1].
+I successfully processed gigabytes of data and fine-tuned a **MobileNetV2** architecture entirely on an **Intel Core i5-13500H CPU**. By utilizing strict thermal management, phase-based training (Warmup & Unfreeze), and optimized PyTorch data loaders, the model achieved **96.91% validation accuracy**. The final inference script runs flawlessly in real-time at 30+ FPS on consumer-grade hardware.
 
 ---
 
 ## 🧠 How It Works (The Pipeline)
 
-The system operates via a real-time, four-step pipeline[cite: 1]:
+The system operates via a real-time, four-step pipeline:
 
-1. **Face & Landmark Extraction**: Using the MediaPipe Face Mesh, the system extracts 468 facial landmarks per frame in real time to locate the exact coordinates of the eyes and mouth[cite: 1].
-2. **Geometric Filtering**: Before running heavy neural networks, the system calculates the Eye Aspect Ratio (EAR) and Mouth Aspect Ratio (MAR) to monitor physical distances[cite: 1].
-3. **CNN Classification**: If the geometric thresholds indicate potential drowsiness (e.g., mouth open wide or eyes low), the specific eye or mouth region is cropped and passed to the fine-tuned CNN classifiers to confirm the state (Open/Closed or Talking/Yawning)[cite: 1].
-4. **Temporal Decision Logic**: The system maintains a sliding window of recent frames (e.g., 30 frames / 1 second)[cite: 1]. A persistent audio/visual alert is only triggered if the "closed" or "yawning" state is sustained over multiple frames, effectively filtering out false positives like natural blinking[cite: 1].
+1. **Face & Landmark Extraction**: Using the MediaPipe Face Mesh, the system extracts 468 facial landmarks per frame in real time to locate the exact coordinates of the eyes and mouth.
+2. **Geometric Filtering**: Before running heavy neural networks, the system calculates the Eye Aspect Ratio (EAR) and Mouth Aspect Ratio (MAR) to monitor physical distances.
+3. **CNN Classification**: If the geometric thresholds indicate potential drowsiness (e.g., mouth open wide or eyes low), the specific eye or mouth region is cropped and passed to the fine-tuned CNN classifiers to confirm the state (Open/Closed or Talking/Yawning).
+4. **Temporal Decision Logic**: The system maintains a sliding window of recent frames (e.g., 30 frames / 1 second). A persistent audio/visual alert is only triggered if the "closed" or "yawning" state is sustained over multiple frames, effectively filtering out false positives like natural blinking.
 
 ---
 
 ## 📊 Datasets Used
 To train the models to recognize fatigue in diverse environments, two primary datasets were utilized:
-* **MRL Eye Dataset**: Used for training the eye-state classifier. It contains nearly 85,000 images of open and closed eyes across 37 different subjects under various lighting conditions[cite: 1].
-* **YawDD (Yawning Detection Dataset)**: Comprises 351 videos of diverse subjects talking, driving normally, and yawning[cite: 1]. Frames were extracted via OpenCV to train the binary mouth-state CNN[cite: 1].
+* **MRL Eye Dataset**: Used for training the eye-state classifier. It contains nearly 85,000 images of open and closed eyes across 37 different subjects under various lighting conditions.
+* **YawDD (Yawning Detection Dataset)**: Comprises 351 videos of diverse subjects talking, driving normally, and yawning. Frames were extracted via OpenCV to train the binary mouth-state CNN.
 
 ---
 
